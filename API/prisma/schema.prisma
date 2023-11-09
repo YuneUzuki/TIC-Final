@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model centro_custo {
+  ID               Int       @id @default(autoincrement())
+  DES_CENTRO_CUSTO String    @db.VarChar(200)
+  STA_ATIVO        String?   @db.Char(1)
+  SIGLA            String?   @db.VarChar(100)
+  DATA_INICIAL     DateTime? @db.Date
+  DATA_FINAL       DateTime? @db.Date
+  OBSERVACOES      String?   @db.VarChar(2000)
+  movimentacao_financeira  movimentacao_financeira[]
+}
+
+model fornecedor {
+  ID                 Int                  @id @default(autoincrement())
+  PESSOA             String               @db.Char(1)
+  NOM_PESSOA         String               @db.VarChar(100)
+  DAT_CADASTRO       DateTime             @db.Date
+  NUM_CGC            String?              @db.Char(14)
+  NUM_CPF            String?              @db.Char(11)
+  EMAIL              String               @db.VarChar(2000)
+  NOM_CONTATO        String               @db.VarChar(100)
+  STA_ATIVO          String               @db.Char(1)
+  NOM_APELIDO        String?              @db.VarChar(100)
+  NOM_FANTASIA       String               @db.VarChar(200)
+  NUM_RG             String?              @db.VarChar(15)
+  DES_HISTORICO      String?              @db.VarChar(3000)
+  NOM_CARGO          String?              @db.VarChar(100)
+  RAMO_ATIVIDADE     String?              @db.VarChar(3000)
+  FONE               String?              @db.VarChar(100)
+  STA_POSSUI_NFE     String?              @db.Char(1)
+  WEBSITE            String?              @db.VarChar(200)
+  NUM_INSC_ESTATUAL  String?              @db.VarChar(20)
+  USER_CAD           Int
+  DATA_CAD           DateTime             @db.Date
+  usuario            usuario              @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "FORNECEDOR_USUARIO_FK")
+  fornecedor_produto fornecedor_produto[]
+  movimentacao_financeira  movimentacao_financeira[]
+}
+
+model fornecedor_produto {
+  ID         Int        @id @default(autoincrement())
+  ID_FORN    Int
+  ID_PROD    Int
+  USER_CAD   Int
+  DATA_CAD   DateTime   @db.Date
+  fornecedor fornecedor @relation(fields: [ID_FORN], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "FORN_PROD_FORNECEDOR_FK")
+  produto    produto    @relation(fields: [ID_PROD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "FORN_PROD_PRODUTO_FK")
+  usuario    usuario    @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "FORN_PROD_USUARIO_FK")
+}
+
+model movimentacao {
+  ID                     Int                    @id @default(autoincrement())
+  ID_PROD                Int
+  E_S                    String                 @db.Char(1)
+  DATA_MOVTO             DateTime               @db.Date
+  TIPO_MOVTO             Int
+  QTD                    Decimal                @db.Decimal(10, 2)
+  VALOR                  Decimal                @db.Decimal(10, 2)
+  VALOR_TOTAL            Decimal                @db.Decimal(10, 2)
+  VALOR_MEDIO            Decimal                @db.Decimal(10, 2)
+  QTD_EST_ATUAL          Decimal?                @db.Decimal(10, 2)
+  USER_CAD               Int
+  DATA_CAD               DateTime               @db.Date
+  produto                produto                @relation(fields: [ID_PROD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "MOVTO_FIN_PRODUTO_FK")
+  tipo_movimento_estoque tipo_movimento_estoque @relation(fields: [TIPO_MOVTO], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "MOVTO_FIN_TIPO_MOVTO_FK")
+  usuario                usuario                @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "MOVTO_FIN_USUARIO_FK")
+}
+
+model produto {
+  ID                 Int                  @id @default(autoincrement())
+  COD_MATERIAL       String               @unique(map: "PRODUTO_UK") @db.VarChar(30)
+  DESCRICAO          String
+  MARCA              String               @db.VarChar(400)
+  TIPO_PROD_ID       Int
+  STA_ATIVO          String               @db.Char(1)
+  QTD_ESTOQUE_MINIMO Decimal?             @db.Decimal(16, 3)
+  QTD_ESTOQUE_MAXIMO Decimal?             @db.Decimal(16, 3)
+  UNME_ID            Int
+  DAT_INCLUSAO       DateTime             @db.Date
+  IMAGEM             String?
+  USER_CAD           Int
+  DATA_CAD           DateTime             @db.Date
+  fornecedor_produto fornecedor_produto[]
+  movimentacao       movimentacao[]
+  tipo_produto       tipo_produto         @relation(fields: [TIPO_PROD_ID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "PRODUTO_TIPO_PROD_FK")
+  unidade_medida     unidade_medida       @relation(fields: [UNME_ID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "PRODUTO_UNME_FK")
+  usuario            usuario              @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "PRODUTO_USUARIO_FK")
+}
+
+model tipo_movimento_estoque {
+  ID                 Int            @id @default(autoincrement())
+  DES_TIPO_MOVIMENTO String
+  DES_OBSERVACAO     String
+  STA_ATIVO          String         @db.Char(1)
+  STA_TIPO_MOVIMENTO String         @db.Char(1)
+  USER_CAD           Int
+  DATA_CAD           DateTime       @db.Date
+  movimentacao       movimentacao[]
+  usuario            usuario        @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "TPMOV_USUARIO_FK")
+}
+
+model tipo_produto {
+  ID                    Int       @id @default(autoincrement())
+  SEGMENTO              String
+  STA_CONTROLA_VALIDADE String    @db.Char(1)
+  STA_MOV_ESTOQUE       String    @db.Char(1)
+  UEPS_PEPS             String    @db.Char(1)
+  USER_CAD              Int
+  DATA_CAD              DateTime  @db.Date
+  produto               produto[]
+  usuario               usuario   @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "TIPROD_USUARIO_FK")
+}
+
+model unidade_medida {
+  ID          Int       @id @default(autoincrement())
+  DES_UNIDADE String    @db.VarChar(40)
+  UNID_SIGLA  String    @db.VarChar(10)
+  USER_CAD    Int
+  DATA_CAD    DateTime  @db.Date
+  produto     produto[]
+  usuario     usuario   @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "UNME_USUARIO_FK")
+}
+
+model usuario {
+  ID                      Int                       @id @default(autoincrement())
+  USUARIO                 String                    @db.VarChar(100)
+  SENHA                   String                    @db.VarChar(20)
+  NOME                    String                    @db.VarChar(300)
+  EMAIL                   String?                   @db.VarChar(300)
+  DDD_CELULAR             Int                       @db.SmallInt
+  CELULAR                 Int 
+  ADMIN                   String                    @db.Char(1) @default("N")
+  fornecedor              fornecedor[]
+  fornecedor_produto      fornecedor_produto[]
+  movimentacao            movimentacao[]
+  produto                 produto[]
+  tipo_movimento_estoque  tipo_movimento_estoque[]
+  tipo_produto            tipo_produto[]
+  unidade_medida          unidade_medida[]
+  origem_receita          origem_receita[]
+  plano_contas            plano_contas[]
+  movimentacao_financeira movimentacao_financeira[]
+}
+
+model origem_receita {
+  ID                     Int                      @id @default(autoincrement())
+  ATIVO                  String                   @db.Char(1)
+  DESCRICAO              String                   @db.VarChar(100)
+  OBSERVACAO             String?                  @db.VarChar(400)
+  USER_CAD               Int
+  DATA_CAD               DateTime                 @db.Date
+  usuario                usuario                  @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "OR_RECEITA_USUARIO_FK")
+  movimentacao_financeira  movimentacao_financeira[]
+}
+
+model plano_contas {
+  ID                       Int                         @id @default(autoincrement())
+  COD_NIVE1                Int                         
+  DESC_NIVEL1              Int                         
+  COD_NIVE2                Int                         
+  DESC_NIVEL2              Int                         
+  COD_NIVE3                Int                         
+  DESC_NIVEL3              Int                         
+  USER_CAD                 Int                         
+  DATA_CAD                 DateTime                    @db.Date
+  usuario                  usuario                     @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "PCONTAS_USUARIO_FK")
+  movimentacao_financeira  movimentacao_financeira[]
+}
+
+model movimentacao_financeira {
+  ID                     Int                      @id @default(autoincrement())
+  E_S                    String                   @db.Char(1)
+  ID_CENTRO_CUSTO        Int                      
+  DATA_MOVTO             DateTime                 @db.Date
+  ID_ORIG_RECEITA        Int                      
+  VALOR                  Decimal?                 @db.Decimal(16, 2)
+  ID_FORN                Int?                      
+  ID_PLANO               Int?                      
+  OBSERVACAO             String?                  @db.VarChar(400)              
+  USER_CAD               Int                      
+  DATA_CAD               DateTime                 @db.Date
+  usuario                usuario                  @relation(fields: [USER_CAD], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "MOVTOFIN_USUARIO_FK")
+  fornecedor             fornecedor?              @relation(fields: [ID_FORN], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "MOVTOFIN_FORN_FK")
+  centro_custo           centro_custo             @relation(fields: [ID_CENTRO_CUSTO], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "MOVTOFIN_CCUSTO_FK")
+  plano_contas           plano_contas?            @relation(fields: [ID_PLANO], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "MOVTOFIN_PLANO_CONTAS_FK")
+  origem_receita         origem_receita           @relation(fields: [ID_ORIG_RECEITA], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "MOVTOFIN_ORIG_RECEITA_FK")
+}

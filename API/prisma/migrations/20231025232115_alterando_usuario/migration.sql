@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "usuario" ADD COLUMN     "ADMIN" CHAR(1) NOT NULL DEFAULT 'N';

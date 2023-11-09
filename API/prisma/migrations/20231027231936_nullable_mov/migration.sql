@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "movimentacao" ALTER COLUMN "QTD_EST_ATUAL" DROP NOT NULL;
