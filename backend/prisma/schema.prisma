@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User_Login {
+  username          String @id
+  password          String
+}
+
+model Unidade_Medida {
+  id_unme           Int @id @default(autoincrement())
+  des_unidade       String
+  unid_sigla        String
+  user_cad          String
+  data_cad          String
+  }
+
+model Tipo_Prod {
+  id_tipo           Int @id @default(autoincrement())
+  segmento          String
+  sta_controla_val  String
+  sta_mov_estoque   String
+  ueps_peps         String
+  user_cad          String
+  data_cad          String
+}
+
+model Produto {
+  id                Int @id @default(autoincrement())
+  cod_material      String
+  desc_prod         String
+  marca_prod        String
+  id_tipo           Int
+  sta_ativo         String
+  estoque_min       Int
+  estoque_max       Int
+  id_unme           Int
+  data_incl         String
+  user_cad          String
+  data_cad          String
+  associacoes       Forn_Prod[]
+}
+
+model Fornecedor {
+  id_fornecedor     Int @id @default(autoincrement())
+  pessoa            Boolean
+  nome_pessoa       String
+  data_cadastro     String
+  num_cpf           String
+  email             String
+  nome_fantasia     String
+  ramo_atividade    String
+  fone              String
+  sta_possui_nfe    String
+  website           String
+  num_insc_estatual String
+  prazo_entrega     Int
+  associacoes       Forn_Prod[]
+}
+
+model Forn_Prod {
+  id_fornprod       Int @id @default(autoincrement())
+  id_fornecedor     Int
+  id_produto        Int
+  prod              Produto @relation(fields: [id_produto], references: [id])
+  forn              Fornecedor @relation(fields: [id_fornecedor], references: [id_fornecedor])
+}
+
+model Tipo_Movimento {
+  id_tipo_mov       Int @id @default(autoincrement())
+  desc_tipo_mov     String
+  desc_obs          String
+}
+
+model Movimentacao {
+  id_mov            Int @id @default(autoincrement())
+  id_produto        Int
+  es                String
+  data_movto        String
+  tipo_movto        Int
+  qtd               Int
+  valor             Int
+  valor_total       Int
+  user_cad          String
+  data_cad          String
+}

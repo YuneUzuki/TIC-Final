@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLocation } from 'react-router-dom';
+import Login from "../Login";
+import { useCookies } from "react-cookie";
 
 interface objectprops {
     id_tipo: number,
@@ -17,6 +19,9 @@ export default function TiposProdConsulta()
     //Retrieve Username Var//
     const location = useLocation();
     const username = location.state?.username || '';
+
+    const [cookie] = useCookies(['username'])
+    if(cookie.username == undefined) return <Login />
 
     //Navigation//
     const navigate = useNavigate();

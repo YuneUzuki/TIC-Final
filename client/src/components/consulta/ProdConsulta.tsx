@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
+import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom"
 import { useLocation } from 'react-router-dom';
+import Login from "../Login";
 
 interface objectprops {
     id: number,
@@ -22,6 +24,9 @@ export default function ProdConsulta()
     //Retrieve Username Var//
     const location = useLocation();
     const username = location.state?.username || '';
+
+    const [cookie] = useCookies(['username'])
+    if(cookie.username == undefined) return <Login />
 
     //Navigation//
     const navigate = useNavigate();

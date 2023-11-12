@@ -1,32 +1,25 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useCookies } from 'react-cookie'
 
 export default function Login()
 {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [cookie, setCookie] = useCookies(['username'])
     const navigate = useNavigate();
   
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-
-      const user = {
-        USUARIO: username,
-        SENHA: password
-      }
   
-      const apicall = await fetch(`http://localhost:3333/api/usuario/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(user)
+      const apicall = await fetch(`http://localhost:776/login/${username}/${password}`, {
+        method: 'GET'
       })
       .then (answer => {
         return answer.json();
       })
 
-      apicall ? navigate("/index", {state: {username: username}}) : alert("Nome de usuário e/ou Senha incorretos")
+      if(apicall){setCookie('username', username); navigate("/index", {state: {username: username}})}else{alert("Nome de usuário e/ou Senha incorretos")}
     }
   
     return (
